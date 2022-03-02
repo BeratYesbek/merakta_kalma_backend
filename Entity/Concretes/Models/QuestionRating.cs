@@ -13,6 +13,8 @@ namespace Entity.Concretes.Models
 
         public int UserId { get; set; }
 
+        public bool Rate { get; set; }
+
         public int QuestionId { get; set; }
 
     }

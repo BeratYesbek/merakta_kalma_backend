@@ -10,10 +10,8 @@ using Entity.Concretes.Models;
 
 namespace DataAccess.Abstracts
 {
-    public interface IQuestionDal : IEntityRepository<Question>
+    public interface IQuestionCommentDal : IEntityRepository<QuestionComment>
     {
-        List<QuestionReadDto> GetAllQuestionDetail(Expression<Func<QuestionReadDto,bool>> filter = null);
-
-        QuestionReadDto GetQuestionDetail(Expression<Func<Question, bool>> filter);
+        List<QuestionCommentReadDto> GetQuestionDetailsByQuestionId(Expression<Func<QuestionComment, bool>> filter);
     }
 }

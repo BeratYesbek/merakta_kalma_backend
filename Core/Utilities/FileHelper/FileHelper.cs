@@ -38,7 +38,6 @@ namespace Core.Utilities.FileHelper
         public FileHelper(RecordType recordType, FileExtension fileExtension, FolderName folderName = default)
         {
             FileType = GetExtensions(fileExtension);
-
             if (recordType == RecordType.Cloud)
             {
                 _fileHelper = new CloudinaryService();
@@ -93,6 +92,33 @@ namespace Core.Utilities.FileHelper
             }
 
             return result;
+        }
+
+
+        public async Task<IResult> UpdateAsync(IFormFile file, string filePath, string publicId = null)
+        {
+            var result = CheckFileTypeValid(Path.GetExtension(file.FileName));
+            if (result.Success)
+            {
+                return await _fileHelper.UpdateAsync(file, filePath, publicId);
+            }
+
+            return result;
+        }
+
+        public async Task<IResult> UploadAsync(IFormFile file)
+        {
+            var result = CheckFileTypeValid(Path.GetExtension(file.FileName));
+            if (result.Success)
+            {
+                return await _fileHelper.UploadAsync(file);
+            }
+            return result;
+        }
+
+        public async Task<IResult> DeleteAsync(string filePath, string publicId = null)
+        {
+            return await _fileHelper.DeleteAsync(filePath, publicId);
         }
 
         public IResult Delete(string filePath, string publicId = null)

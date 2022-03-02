@@ -10,10 +10,12 @@ namespace WebApi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+
         public UsersController(IUserService userService)
         {
             _userService = userService;
         }
+
 
         [HttpPost("delete")]
         public IActionResult Delete(User user)

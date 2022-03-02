@@ -9,11 +9,11 @@ using DataAccess.Abstracts;
 
 namespace DataAccess.Concretes
 {
-    public class EfUserDal : EntityRepositoryBase<User, DatabaseContext>, IUserDal
+    public class EfUserDal : EntityRepositoryBase<User, AppDbContext>, IUserDal
     {
         public List<OperationClaim> GetClaims(User user)
         {
-            using (var context = new DatabaseContext())
+            using (var context = new AppDbContext())
             {
                 var result = from operationClaim in context.OperationClaims
                              join userOperationClaim in context.UserOperationClaims

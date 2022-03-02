@@ -44,7 +44,7 @@ namespace WebApi
         public void ConfigureServices(IServiceCollection services)
         {
 
-            DatabaseContext.DbConnectionString = Configuration.GetConnectionString("DB_CONNECTION_STRING");
+            AppDbContext.DbConnectionString = Configuration.GetConnectionString("DB_CONNECTION_STRING");
 
             var tokenOptions = Configuration.GetSection("TokenOptions").Get<TokenOptions>();
 
@@ -81,15 +81,7 @@ namespace WebApi
             //});
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-
-            services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
-            {
-                builder.AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-            }));
-
+            
 
             services.AddSwaggerGen(c =>
             {
@@ -111,7 +103,13 @@ namespace WebApi
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApi v1"));
             }
-            app.UseCors(builder => builder.WithOrigins("https://249e-88-226-104-109.ngrok.io", "http://localhost:3000").AllowAnyHeader());
+
+            app.UseCors(builder => builder
+                .WithOrigins("http://localhost:4200")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowAnyOrigin()
+                .DisallowCredentials());
 
             app.UseHttpsRedirection();
 

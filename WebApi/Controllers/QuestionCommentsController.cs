@@ -31,7 +31,7 @@ namespace WebApi.Controllers
         [HttpPut]
         public IActionResult Update(QuestionComment comment)
         {
-            var result = _service.Add(comment);
+            var result = _service.Update(comment);
             if (result.Success)
             {
                 return Ok(result);
@@ -75,6 +75,18 @@ namespace WebApi.Controllers
 
             return BadRequest(result);
 
+        }
+
+        [HttpGet("getQuestionDetailsByQuestionId/{questionId}")]
+        public IActionResult GetQuestionDetailsByQuestionId(int questionId)
+        {
+            var result = _service.GetQuestionDetailsByQuestionId(questionId);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(result);
         }
 
     }

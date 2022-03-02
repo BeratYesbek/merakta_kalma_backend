@@ -8,6 +8,7 @@ using Business.Abstracts;
 using Core.Utilities.FileHelper;
 using Core.Utilities.Result;
 using DataAccess.Abstracts;
+using Entity.Concretes.Dtos;
 using Entity.Concretes.Models;
 
 namespace Business.Concretes
@@ -18,8 +19,6 @@ namespace Business.Concretes
 
         private readonly IQuestionTagService _questionTagService;
 
-        private readonly IMapper _mapper;
-
         private readonly IQuestionFileService _questionFileService;
 
         private readonly IQuestionDal _questionDal;
@@ -29,17 +28,16 @@ namespace Business.Concretes
             IQuestionDal questionDal,
             IQuestionFileService questionFileService,
             ITagService tagService,
-            IQuestionTagService questionTagService,
-            IMapper mapper)
+            IQuestionTagService questionTagService
+           )
         {
             _tagService = tagService;
             _questionTagService = questionTagService;
-            _mapper = mapper;
             _questionFileService = questionFileService;
             _questionDal = questionDal;
         }
 
-        public IDataResult<Question> Add(Question question, QuestionFile questionFile, Tag tag)
+        public async Task<IDataResult<Question>> Add(Question question, QuestionFile questionFile, Tag tag)
         {
             var questionResult = _questionDal.Add(question);
             if (questionResult == null)
@@ -48,33 +46,30 @@ namespace Business.Concretes
             }
             foreach (var name in tag.Tags)
             {
-
                 var result = _tagService.GetByName(name);
                 if (!result.Success)
                 {
                     tag.Name = name;
                     var tagResult = _tagService.Add(tag);
-                    var questionTag = _mapper.Map<QuestionTag>(tagResult.Data);
-                    questionTag = _mapper.Map<QuestionTag>(result.Data);
-                    _questionTagService.Add(questionTag);
+                    _questionTagService.Add(new QuestionTag { QuestionId = questionResult.Id, TagId = tagResult.Data.Id });
+                    continue;
                 }
-                var _questionTag = _mapper.Map<QuestionTag>(questionResult);
-                _questionTag = _mapper.Map<QuestionTag>(questionResult);
-                _questionTagService.Add(_questionTag);
+                _questionTagService.Add(new QuestionTag { QuestionId = questionResult.Id, TagId = result.Data.Id });
             }
 
             foreach (var file in questionFile.Files)
             {
                 var fileHelper = new FileHelper(RecordType.Cloud, FileExtension.ImageExtension);
-                var fileResult = fileHelper.Upload(file);
+                var fileResult = await fileHelper.UploadAsync(file);
                 if (fileResult.Success)
                 {
-                    var questionFileObject = new QuestionFile();
-                    questionFileObject.Id = 0;
-                    questionFileObject.QuestionId = questionResult.Id;
-                    questionFileObject.FileUrl = fileResult.Message.Split("&&")[0];
-                    questionFileObject.PublicId = fileResult.Message.Split("&&")[1];
-                    _questionFileService.Add(questionFileObject);
+                    _questionFileService.Add(new QuestionFile
+                    {
+                        QuestionId = questionResult.Id,
+                        FileUrl = fileResult.Message.Split("&&")[0],
+                        PublicId = fileResult.Message.Split("&&")[1]
+
+                    });
                 }
             }
 
@@ -124,6 +119,28 @@ namespace Business.Concretes
             }
 
             return new ErrorDataResult<List<Question>>(data);
+        }
+
+        public IDataResult<List<QuestionReadDto>> GetAllQuestionDetail()
+        {
+            var data = _questionDal.GetAllQuestionDetail();
+            if (data.Count > 0)
+            {
+                return new SuccessDataResult<List<QuestionReadDto>>(data);
+            }
+
+            return new ErrorDataResult<List<QuestionReadDto>>(data);
+        }
+
+        public IDataResult<QuestionReadDto> GetQuestionDetailByQuestionId(int questionId)
+        {
+            var data = _questionDal.GetQuestionDetail(c => c.Id == questionId);
+            if (data is not null)
+            {
+                return new SuccessDataResult<QuestionReadDto>(data);
+            }
+
+            return new ErrorDataResult<QuestionReadDto>(null);
         }
     }
 }

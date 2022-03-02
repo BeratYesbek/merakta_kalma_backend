@@ -1,4 +1,5 @@
-﻿using CloudinaryDotNet;
+﻿using System.Threading.Tasks;
+using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Core.Utilities.IoC;
 using Core.Utilities.Result;
@@ -42,6 +43,45 @@ namespace Core.Utilities.Cloud.Cloudinary
         {
             var deletionParams = new DeletionParams(publicId);
             _cloudinary.Destroy(deletionParams);
+            return new SuccessResult();
+        }
+
+
+        public async Task<IResult> UploadAsync(IFormFile file)
+        {
+            ImageUploadResult imageUploadResult = null;
+            var uploadParams = new ImageUploadParams()
+            {
+                File = new FileDescription(file.FileName, file.OpenReadStream())
+            };
+
+            imageUploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+            return new SuccessResult($"{imageUploadResult.SecureUrl}&&{imageUploadResult.PublicId}");
+        }
+
+
+        public async Task<IResult> UpdateAsync(IFormFile file, string filePath, string publicId = default)
+        {
+            var result = Delete(null, publicId);
+            if (result.Success)
+            {
+                var addedDelete = await UploadAsync(file);
+                if (addedDelete.Success)
+                {
+                    return new SuccessResult(addedDelete.Message);
+                }
+
+                return new ErrorResult(addedDelete.Message);
+            }
+
+            return new ErrorResult(result.Message);
+        }
+
+        public async Task<IResult> DeleteAsync(string filePath, string publicId = default)
+        {
+            var deletionParams = new DeletionParams(publicId);
+             await _cloudinary.DestroyAsync(deletionParams);
             return new SuccessResult();
         }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Utilities.Result;
+using Entity.Concretes.Dtos;
 using Entity.Concretes.Models;
 
 namespace Business.Abstracts
@@ -18,7 +19,8 @@ namespace Business.Abstracts
 
         IDataResult<QuestionComment> Get(int id);
 
-
         IDataResult<List<QuestionComment>> GetAll();
+
+        IDataResult<List<QuestionCommentReadDto>> GetQuestionDetailsByQuestionId(int questionId);
     }
 }
